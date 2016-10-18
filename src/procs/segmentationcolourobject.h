@@ -7,12 +7,10 @@
 #define MOTE_VISION_DATA_SEGMENTATIONCOLOUROBJECT_H
 
 #include <opencv2/core/types.hpp>
-#include "colour.h"
-#include "rect.h"
 
 namespace mote
 {
-namespace data
+namespace procs
 {
 /**
  * This class represents the objects found by the segmentation colour algorithm.
@@ -23,7 +21,7 @@ public:
 	/**
 	 * Boundary box of the blob.
 	 */
-	mote::data::Rect<int> bBox;
+	cv::Rect2i bBox;
 
 	/**
 	 * This keeps the center of the blob.
@@ -38,16 +36,17 @@ public:
 	/**
 	 * RGB of the average colour of the blob.
 	 */
-	mote::data::Pixel average;
+	cv::Vec3b average;
+
 	/**
 	 * Seed colour used in the flood fill algorithm.
 	 */
-	mote::data::Pixel seed;
+	cv::Vec3b seed;
 
 	SegmentationColourObject();
 
-	SegmentationColourObject(const Rect<int> &bBox, const cv::Point2i &center, unsigned int size,
-		const Pixel &average, const Pixel &seed);
+	SegmentationColourObject(const cv::Rect2i &bBox, const cv::Point2i &center, unsigned int size,
+		const cv::Vec3b &average, const cv::Vec3b &seed);
 };
 }
 }

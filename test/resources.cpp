@@ -5,9 +5,7 @@
 
 #include "resources.h"
 
-/*
 boost::filesystem::path Resources::resources()
 {
 	return boost::filesystem::path(TEST_RESOURCE_DIR);
 }
-*/

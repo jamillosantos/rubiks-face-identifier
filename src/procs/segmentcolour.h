@@ -9,17 +9,23 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/mat.hpp>
 
-#include <data/colour_definition.h>
-#include <data/segmentationcolourobject.h>
-#include <data/floodfillstate.h>
+#include "segmentationcolourobject.h"
+#include "floodfillstate.h"
 
 #define BRIGHT_PIXEL 256
 #define DARK_PIXEL 4
 
 namespace mote
 {
-namespace imgprocs
+namespace procs
 {
+
+class SegmentColourVisitor
+{
+public:
+	virtual bool matches(const cv::Vec3b &base, const cv::Vec3b &neighbour) const = 0;
+};
+
 /**
  * Performs the segmentation colour detection using the `data::ColourDefinition`.
  *
@@ -40,6 +46,8 @@ private:
 	cv::Point* _stack;
 	int _stackSize;
 	int _stackLength;
+
+	double diffIntensity(const cv::Vec3b &base, const cv::Vec3b &from);
 protected:
 	void pushToStack(const unsigned int x, const unsigned int y);
 	void pushToStack(const cv::Point2i& point);
@@ -58,8 +66,8 @@ protected:
 	 * @param state The state of the flood fill algorithm
 	 * @return If fails it will return the code of the error
 	 */
-	ErrorCode doFloodFill(cv::Mat &in, cv::Mat &out, cv::Point2i p, mote::data::Pixel &seed, unsigned int threshold,
-		const mote::data::ColourDefinition *target, unsigned int subsample, mote::data::FloodFillState *state);
+	ErrorCode doFloodFill(cv::Mat &in, cv::Mat &out, cv::Point2i p, cv::Vec3b &seed, unsigned int threshold,
+		const SegmentColourVisitor *target, unsigned int subsample, mote::procs::FloodFillState *state);
 public:
 	SegmentColour(unsigned int stackSize);
 	virtual ~SegmentColour();
@@ -77,8 +85,10 @@ public:
 	 * @param results Vector of the objects found on the process
 	 */
 	void action(cv::Mat &in, cv::Mat &out, unsigned int threshold, unsigned int minLength, unsigned int minSize,
-		unsigned int subsample, const mote::data::ColourDefinition &colourDefinition,
-		std::vector<mote::data::SegmentationColourObject> &results);
+		unsigned int subsample, const SegmentColourVisitor &colourDefinition,
+		std::vector<mote::procs::SegmentationColourObject> &results);
+
+	double pxIntensity(const cv::Vec3b &pixel);
 };
 }
 }

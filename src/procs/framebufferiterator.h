@@ -7,12 +7,11 @@
 #define MOTE_VISION_MATCVITERATOR_H
 
 #include <cstdint>
-#include <data/pixel.h>
 #include <opencv2/core/mat.hpp>
 
 namespace mote
 {
-namespace imgprocs
+namespace procs
 {
 class FrameBufferIterator
 {
@@ -37,13 +36,13 @@ public:
 
 	virtual bool inBounds(const unsigned int x, const unsigned int y);
 
-	virtual bool getPixel(mote::data::Pixel *px, const unsigned int x, const unsigned int y) = 0;
-	virtual bool getPixel(mote::data::Pixel &px, const unsigned int x, const unsigned int y) = 0;
+	virtual bool getPixel(cv::Vec3b *px, const unsigned int x, const unsigned int y) = 0;
+	virtual bool getPixel(cv::Vec3b &px, const unsigned int x, const unsigned int y) = 0;
 
-	virtual bool setPixel(mote::data::Pixel *px) = 0;
-	virtual bool setPixel(const mote::data::Pixel &px) = 0;
-	virtual bool setPixel(const unsigned int x, const unsigned int y, mote::data::Pixel *px) = 0;
-	virtual bool setPixel(const unsigned int x, const unsigned int y, const mote::data::Pixel &px) = 0;
+	virtual bool setPixel(cv::Vec3b *px) = 0;
+	virtual bool setPixel(const cv::Vec3b &px) = 0;
+	virtual bool setPixel(const unsigned int x, const unsigned int y, cv::Vec3b *px) = 0;
+	virtual bool setPixel(const unsigned int x, const unsigned int y, const cv::Vec3b &px) = 0;
 
 	virtual bool goNext();
 	virtual bool go(const unsigned int x, const unsigned int y);
@@ -52,10 +51,10 @@ public:
 	virtual bool goUp(const unsigned int amount = 1);
 	virtual bool goDown(const unsigned int amount = 1);
 
-	virtual bool get(mote::data::Pixel *pixel);
-	virtual bool get(mote::data::Pixel *pixel, const int offsetX, const int offsetY);
-	virtual bool get(mote::data::Pixel &pixel);
-	virtual bool get(mote::data::Pixel &pixel, const int offsetX, const int offsetY);
+	virtual bool get(cv::Vec3b *pixel);
+	virtual bool get(cv::Vec3b *pixel, const int offsetX, const int offsetY);
+	virtual bool get(cv::Vec3b &pixel);
+	virtual bool get(cv::Vec3b &pixel, const int offsetX, const int offsetY);
 };
 
 class FramBufferIteratorRGB24
@@ -66,13 +65,13 @@ public:
 
 	virtual uint8_t *getAddress(const unsigned int x, const unsigned int y) override;
 
-	virtual bool getPixel(mote::data::Pixel *px, const unsigned int x, const unsigned int y) override;
-	virtual bool getPixel(mote::data::Pixel &px, const unsigned int x, const unsigned int y) override;
+	virtual bool getPixel(cv::Vec3b *px, const unsigned int x, const unsigned int y) override;
+	virtual bool getPixel(cv::Vec3b &px, const unsigned int x, const unsigned int y) override;
 
-	virtual bool setPixel(mote::data::Pixel *px) override;
-	virtual bool setPixel(const mote::data::Pixel &px) override;
-	virtual bool setPixel(const unsigned int x, const unsigned int y, mote::data::Pixel *px) override;
-	virtual bool setPixel(const unsigned int x, const unsigned int y, const mote::data::Pixel &px) override;
+	virtual bool setPixel(cv::Vec3b *px) override;
+	virtual bool setPixel(const cv::Vec3b &px) override;
+	virtual bool setPixel(const unsigned int x, const unsigned int y, cv::Vec3b *px) override;
+	virtual bool setPixel(const unsigned int x, const unsigned int y, const cv::Vec3b &px) override;
 };
 
 template <typename T>

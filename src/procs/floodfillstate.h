@@ -8,12 +8,10 @@
 
 #include <boost/algorithm/clamp.hpp>
 #include <opencv2/core/types.hpp>
-#include "pixel.h"
-#include "rect.h"
 
 namespace mote
 {
-namespace data
+namespace procs
 {
 /**
  * This class prepresents the state of the flood fill algorithm implemented for the segment colour detection.
@@ -28,7 +26,7 @@ private:
 	unsigned int _sumX;
 	unsigned int _sumY;
 
-	mote::data::Rect<int> _bBox;
+	cv::Rect2i _bBox;
 
 	unsigned int _sumRed;
 	unsigned int _sumGreen;
@@ -43,20 +41,20 @@ public:
 	 * @param y Y coordinate
 	 * @param pixel Colour of the pixel
 	 */
-	void addPoint(const unsigned int x, const unsigned int y, const Pixel& pixel);
+	void addPoint(const unsigned int x, const unsigned int y, const cv::Vec3b& pixel);
 	/**
 	 * @see addPoint(unsigned int, unsigned int, const Pixel&)
 	 * @param p Coordinate
 	 * @param pixel Colour of the pixel
 	 */
-	void addPoint(const cv::Point2f& p, const Pixel& pixel);
+	void addPoint(const cv::Point2f& p, const cv::Vec3b& pixel);
 
 	/**
 	 * Boundary box of all added point.
 	 *
 	 * @return Self.
 	 */
-	mote::data::Rect<int>& bBox();
+	cv::Rect2i& bBox();
 
 	std::size_t size() const;
 	FloodFillState& size(std::size_t size);
@@ -75,7 +73,7 @@ public:
 	 *
 	 * @return
 	 */
-	Pixel averageColour() const;
+	cv::Vec3b averageColour() const;
 
 	/**
 	 * Clean the variables putting it to the initial state.

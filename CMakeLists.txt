@@ -385,26 +385,14 @@ endif()
 message("")
 
 set(SOURCE_FILES
-
-	src/data/colour.cpp
-	src/data/colour.h
-	src/data/serializable.cpp
-	src/data/serializable.h
-	src/data/colour_definition.cpp
-	src/data/colour_definition.h
-	src/data/segmentationcolourobject.cpp
-	src/data/segmentationcolourobject.h
-	src/data/pixel.cpp
-	src/data/pixel.h
-	src/data/floodfillstate.cpp
-	src/data/floodfillstate.h
-	src/data/rect.cpp
-	src/data/rect.h
-
-	src/imgprocs/segmentcolour.cpp
-	src/imgprocs/segmentcolour.h
-	src/imgprocs/framebufferiterator.cpp
-	src/imgprocs/framebufferiterator.h
+	src/procs/framebufferiterator.cpp
+	src/procs/framebufferiterator.h
+	src/procs/floodfillstate.cpp
+	src/procs/floodfillstate.h
+	src/procs/segmentationcolourobject.cpp
+	src/procs/segmentationcolourobject.h
+	src/procs/segmentcolour.cpp
+	src/procs/segmentcolour.h
 )
 
 add_executable(rubiks

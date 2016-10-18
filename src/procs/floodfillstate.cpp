@@ -5,19 +5,22 @@
 
 #include "floodfillstate.h"
 
-mote::data::FloodFillState::FloodFillState()
+mote::procs::FloodFillState::FloodFillState()
 	: _size(0), _sumX(0), _sumY(0), _bBox(std::numeric_limits<int>::max(), std::numeric_limits<int>::max(), 0, 0),
 	  _sumRed(0), _sumGreen(0), _sumBlue(0)
 {}
 
-void mote::data::FloodFillState::addPoint(const unsigned int x, const unsigned int y, const mote::data::Pixel &pixel)
+void mote::procs::FloodFillState::addPoint(const unsigned int x, const unsigned int y, const cv::Vec3b &pixel)
 {
 	if ((signed)x < this->_bBox.x)
 	{
 		if (this->bBox().x == std::numeric_limits<int>::max())
 			this->_bBox.x = x;
 		else
-			this->_bBox.l(x);
+		{
+			this->_bBox.width -= (x - this->_bBox.x);
+			this->_bBox.x = x;
+		}
 	}
 
 	if ((signed)y < this->_bBox.y)
@@ -25,68 +28,73 @@ void mote::data::FloodFillState::addPoint(const unsigned int x, const unsigned i
 		if (this->bBox().y == std::numeric_limits<int>::max())
 			this->_bBox.y = y;
 		else
-			this->_bBox.t(y);
+		{
+			this->_bBox.height -= (y - this->_bBox.y);
+			this->_bBox.y = y;
+		}
 	}
 
-	if ((signed)x > this->_bBox.r())
-		this->_bBox.r(x);
+	if ((signed)x > (this->_bBox.x + this->_bBox.width))
+	{
+		this->_bBox.width = (x - this->_bBox.x);
+	}
 
-	if ((signed)y > this->_bBox.b())
-		this->_bBox.b(y);
+	if ((signed)y > (this->_bBox.y + this->_bBox.height))
+		this->_bBox.height = (y - this->_bBox.y);
 
-	this->_sumRed = this->_sumRed + pixel.r;
-	this->_sumGreen = this->_sumGreen + pixel.g;
-	this->_sumBlue = this->_sumBlue + pixel.b;
+	this->_sumRed = this->_sumRed + pixel.val[2];
+	this->_sumGreen = this->_sumGreen + pixel.val[1];
+	this->_sumBlue = this->_sumBlue + pixel.val[0];
 
 	++this->_size;
 	this->_sumX = this->_sumX + x;
 	this->_sumY = this->_sumY + y;
 }
 
-void mote::data::FloodFillState::addPoint(const cv::Point2f &p, const mote::data::Pixel &pixel)
+void mote::procs::FloodFillState::addPoint(const cv::Point2f &p, const cv::Vec3b &pixel)
 {
 	this->addPoint(p.x, p.y, pixel);
 }
 
-mote::data::Rect<int>& mote::data::FloodFillState::bBox()
+cv::Rect2i& mote::procs::FloodFillState::bBox()
 {
 	return this->_bBox;
 }
 
-std::size_t mote::data::FloodFillState::size() const
+std::size_t mote::procs::FloodFillState::size() const
 {
 	return this->_size;
 }
 
-mote::data::FloodFillState &mote::data::FloodFillState::size(std::size_t size)
+mote::procs::FloodFillState &mote::procs::FloodFillState::size(std::size_t size)
 {
 	this->_size = size;
 	return *this;
 }
 
-unsigned int mote::data::FloodFillState::sumX() const
+unsigned int mote::procs::FloodFillState::sumX() const
 {
 	return this->_sumX;
 }
 
-mote::data::FloodFillState &mote::data::FloodFillState::sumX(unsigned int sumX)
+mote::procs::FloodFillState &mote::procs::FloodFillState::sumX(unsigned int sumX)
 {
 	this->_sumX = sumX;
 	return *this;
 }
 
-unsigned int mote::data::FloodFillState::sumY() const
+unsigned int mote::procs::FloodFillState::sumY() const
 {
 	return this->_sumY;
 }
 
-mote::data::FloodFillState &mote::data::FloodFillState::sumY(unsigned int sumY)
+mote::procs::FloodFillState &mote::procs::FloodFillState::sumY(unsigned int sumY)
 {
 	this->_sumY = sumY;
 	return *this;
 }
 
-int mote::data::FloodFillState::x() const
+int mote::procs::FloodFillState::x() const
 {
 	int result = -1;
 	if (this->_size > 0)
@@ -94,7 +102,7 @@ int mote::data::FloodFillState::x() const
 	return result;
 }
 
-int mote::data::FloodFillState::y() const
+int mote::procs::FloodFillState::y() const
 {
 	int result = -1;
 	if (this->_size > 0)
@@ -102,7 +110,7 @@ int mote::data::FloodFillState::y() const
 	return result;
 }
 
-mote::data::Pixel mote::data::FloodFillState::averageColour() const
+cv::Vec3b mote::procs::FloodFillState::averageColour() const
 {
 	unsigned int red;
 	unsigned int green;
@@ -121,11 +129,14 @@ mote::data::Pixel mote::data::FloodFillState::averageColour() const
 		blue = 0;
 	}
 
-	return mote::data::Pixel(boost::algorithm::clamp(red, 0, 255), boost::algorithm::clamp(green, 0, 255),
-		boost::algorithm::clamp(blue, 0, 255));
+	return cv::Vec3b(
+		boost::algorithm::clamp(blue, 0, 255),
+		boost::algorithm::clamp(green, 0, 255),
+		boost::algorithm::clamp(red, 0, 255)
+	);
 }
 
-void mote::data::FloodFillState::clear()
+void mote::procs::FloodFillState::clear()
 {
 	this->_size = this->_sumX = this->_sumY = 0;
 

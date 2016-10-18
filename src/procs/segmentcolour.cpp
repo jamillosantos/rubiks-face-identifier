@@ -3,49 +3,52 @@
  * @date August 17, 2016
  */
 
-#include <data/floodfillstate.h>
+#include <boost/log/trivial.hpp>
 #include <cv.hpp>
 #include "segmentcolour.h"
 #include "framebufferiterator.h"
 
-mote::imgprocs::SegmentColour::SegmentColour(unsigned int stackSize)
+mote::procs::SegmentColour::SegmentColour(unsigned int stackSize)
 	: _stackSize(stackSize), _stack(new cv::Point[stackSize]), _stackLength(0)
 { }
 
-mote::imgprocs::SegmentColour::~SegmentColour()
+mote::procs::SegmentColour::~SegmentColour()
 {
 	delete this->_stack;
 }
 
-void mote::imgprocs::SegmentColour::pushToStack(const unsigned int x, const unsigned int y)
+void mote::procs::SegmentColour::pushToStack(const unsigned int x, const unsigned int y)
 {
 	this->_stack[this->_stackLength].x = x;
 	this->_stack[this->_stackLength++].y = y;
+	BOOST_LOG_TRIVIAL(trace) << "Q << " << x << ":" << y;
 }
 
-void mote::imgprocs::SegmentColour::pushToStack(const cv::Point2i &point)
+void mote::procs::SegmentColour::pushToStack(const cv::Point2i &point)
 {
 	this->_stack[this->_stackLength++] = point;
+	BOOST_LOG_TRIVIAL(trace) << "Q << " << point.x << ":" << point.y;
 }
 
-cv::Point2i *mote::imgprocs::SegmentColour::popFromStack()
+cv::Point2i *mote::procs::SegmentColour::popFromStack()
 {
 	if (this->_stackLength > 0)
 	{
+		BOOST_LOG_TRIVIAL(trace) << "Q >>cd te	 " << this->_stack[this->_stackLength-1].x << ":" << this->_stack[this->_stackLength-1].y;
 		return &this->_stack[--this->_stackLength];
 	}
 	return nullptr;
 }
 
-mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodFill(cv::Mat &in, cv::Mat &out, cv::Point2i p,
-	mote::data::Pixel &seed, unsigned int threshold, const mote::data::ColourDefinition *target, unsigned int subsample,
-	mote::data::FloodFillState *state)
+mote::procs::SegmentColour::ErrorCode mote::procs::SegmentColour::doFloodFill(cv::Mat &in, cv::Mat &out, cv::Point2i p,
+	cv::Vec3b &seed, unsigned int threshold, const mote::procs::SegmentColourVisitor *target, unsigned int subsample,
+	mote::procs::FloodFillState *state)
 {
-	using namespace mote::data;
+	using namespace mote::procs;
 
-	Pixel pixel;
-	Pixel outPixel;
-	Pixel neighbour;
+	cv::Vec3b pixel;
+	cv::Vec3b outPixel;
+	cv::Vec3b neighbour;
 
 	unsigned int diff;
 
@@ -65,10 +68,10 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 	// If the seed is black, the flood fill will get stuck in an
 	// infinite loop.  So, we skip floodfills on black seeds.
 
-	if ((seed.r == 0) && (seed.g == 0) && (seed.b == 0))
+	if ((seed.val[0] == 0) && (seed.val[1] == 0) && (seed.val[2] == 0))
 	{
 		// Fudge the seed to be not all black.
-		seed.b = 1;
+		seed.val[0] = 1;
 	}
 
 	if (!(iter.go(p.x, p.y) && outIter.go(p.x, p.y)))
@@ -81,12 +84,11 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 	{
 		if (stackIndex >= this->_stackSize - 4)
 		{
+			// TODO: Uncomment
+			// ERROR("possible stack overflow " << stackIndex);
 			return STACK_OVERFLOW;
 		}
 		c = this->_stack[--stackIndex];
-#ifndef Q_NODEBUG
-		//      std::cout << " processing point (" << c.x() << ',' << c.y() << ")" << std::endl;
-#endif
 
 		if (!(iter.go(c.x, c.y) && outIter.go(c.x, c.y)))
 			return OUT_OF_BOUNDS;
@@ -94,10 +96,9 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 		iter.get(&pixel);
 		outIter.get(&outPixel);
 
-		//      if ( ! ImageProcessing::isChecked( outPixel ) )
-		if ((outPixel.r == 0) && (outPixel.g == 0) && (outPixel.b == 0))
+		if ((outPixel.val[0] == 0) && (outPixel.val[1] == 0) && (outPixel.val[2] == 0))
 		{
-			if (((pixel.r < BRIGHT_PIXEL) && (pixel.r > DARK_PIXEL)) && (pixel.g > DARK_PIXEL) && (pixel.b > DARK_PIXEL))
+			if (((pixel.val[2] < BRIGHT_PIXEL) && (pixel.val[2] > DARK_PIXEL)) && (pixel.val[1] > DARK_PIXEL) && (pixel.val[0] > DARK_PIXEL))
 			{
 				state->addPoint(c, pixel);
 
@@ -106,8 +107,8 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 				if (c.x >= subsample)
 				{
 					iter.get(&neighbour, -subsample, 0);
-					diff = pixel.diffIntensity(neighbour);
-					if ((diff <= threshold) && ((target == nullptr) || target->isMatch(pixel)))
+					diff = this->diffIntensity(pixel, neighbour);
+					if ((diff <= threshold) && ((target == nullptr) || target->matches(pixel, neighbour)))
 					{
 						this->_stack[stackIndex].x = c.x - subsample;
 						this->_stack[stackIndex++].y = c.y;
@@ -117,8 +118,8 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 				if (c.x < (in.cols - 1 - subsample))
 				{
 					iter.get(&neighbour, subsample, 0);
-					diff = pixel.diffIntensity(neighbour);
-					if ((diff <= threshold) && ((target == nullptr) || target->isMatch(pixel)))
+					diff = this->diffIntensity(pixel, neighbour);
+					if ((diff <= threshold) && ((target == nullptr) || target->matches(pixel, neighbour)))
 					{
 						this->_stack[stackIndex].x = c.x + subsample;
 						this->_stack[stackIndex++]. y = c.y;
@@ -128,8 +129,8 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 				if (c.y >= subsample)
 				{
 					iter.get(&neighbour, 0, -subsample);
-					diff = pixel.diffIntensity(neighbour);
-					if ((diff <= threshold) && ((target == nullptr) || target->isMatch(pixel)))
+					diff = this->diffIntensity(pixel, neighbour);
+					if ((diff <= threshold) && ((target == nullptr) || target->matches(pixel, neighbour)))
 					{
 						this->_stack[stackIndex].x = c.x;
 						this->_stack[stackIndex++].y = c.y - subsample;
@@ -139,8 +140,8 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 				if (c.y < (in.rows - 1 - subsample))
 				{
 					iter.get(&neighbour, 0, +subsample);
-					diff = pixel.diffIntensity(neighbour);
-					if ((diff <= threshold) && ((target == nullptr) || target->isMatch(pixel)))
+					diff = this->diffIntensity(pixel, neighbour);
+					if ((diff <= threshold) && ((target == nullptr) || target->matches(pixel, neighbour)))
 					{
 						this->_stack[stackIndex].x = c.x;
 						this->_stack[stackIndex++].y = c.y + subsample;
@@ -163,16 +164,29 @@ mote::imgprocs::SegmentColour::ErrorCode mote::imgprocs::SegmentColour::doFloodF
 	return err;
 }
 
-void mote::imgprocs::SegmentColour::action(cv::Mat &in, cv::Mat &out, unsigned int threshold, unsigned int minLength,
-	unsigned int minSize, unsigned int subsample, const mote::data::ColourDefinition &colourDefinition,
-	std::vector<mote::data::SegmentationColourObject>& results)
+double mote::procs::SegmentColour::diffIntensity(const cv::Vec3b &base, const cv::Vec3b &from)
 {
-	using namespace mote::data;
+	double i1 = this->pxIntensity(base) / 3.0;
+	double i2 = this->pxIntensity(from) / 3.0;
+	double diff = i1 - i2;
+	return diff * diff;
+}
+
+double mote::procs::SegmentColour::pxIntensity(const cv::Vec3b &pixel)
+{
+	return (pixel.val[0] + pixel.val[1] + pixel.val[2]) / 3.0;
+}
+
+void mote::procs::SegmentColour::action(cv::Mat &in, cv::Mat &out, unsigned int threshold, unsigned int minLength,
+	unsigned int minSize, unsigned int subsample, const mote::procs::SegmentColourVisitor &colourDefinition,
+	std::vector<mote::procs::SegmentationColourObject>& results)
+{
 	MatIterator<FramBufferIteratorRGB24>
 		it(in, subsample),
 		oit(out, subsample);
-	Pixel
+	cv::Vec3b
 		cPixel,
+		lastCPixel,
 		oPixel;
 	FloodFillState state;
 	unsigned int count;
@@ -183,15 +197,16 @@ void mote::imgprocs::SegmentColour::action(cv::Mat &in, cv::Mat &out, unsigned i
 		oit.go(subsample, row);
 
 		count = 0;
+		it.get(lastCPixel);
 		for (unsigned int col = subsample; col < in.cols; col = col + subsample, it.goLeft(subsample), oit.goLeft(subsample))
 		{
 			oit.get(oPixel);
-			if (oPixel.is(0, 0, 0))
+			if ((oPixel.val[0] == 0) && (oPixel.val[1] == 0) && (oPixel.val[2] == 0))
 			{
 				it.get(cPixel);
 				// oit.setPixel(highlightPixel);
 
-				if (colourDefinition.isMatch(cPixel))
+				if (colourDefinition.matches(lastCPixel, cPixel))
 					count++;
 				else
 					count = 0;
@@ -215,6 +230,9 @@ void mote::imgprocs::SegmentColour::action(cv::Mat &in, cv::Mat &out, unsigned i
 					}
 					count = 0;
 				}
+				lastCPixel.val[0] = cPixel.val[0];
+				lastCPixel.val[1] = cPixel.val[1];
+				lastCPixel.val[2] = cPixel.val[2];
 			}
 			else
 				count = 0;
