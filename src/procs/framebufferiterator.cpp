@@ -6,23 +6,23 @@
 #include <boost/log/trivial.hpp>
 #include "framebufferiterator.h"
 
-mote::procs::FrameBufferIterator::FrameBufferIterator(unsigned int bytesPerPixel, uint8_t *begin, unsigned int width,
+procs::FrameBufferIterator::FrameBufferIterator(unsigned int bytesPerPixel, uint8_t *begin, unsigned int width,
 	unsigned int height, unsigned int subsample)
 	: _bytesPerPixel(bytesPerPixel), _bytesPerLine(width * _bytesPerPixel), _cursor(-1, 0), _begin(begin),
 	_width(width), _height(height), _subsample(subsample)
 { }
 
-const cv::Point2i& mote::procs::FrameBufferIterator::cursor() const
+const cv::Point2i& procs::FrameBufferIterator::cursor() const
 {
 	return this->_cursor;
 }
 
-bool mote::procs::FrameBufferIterator::inBounds(const unsigned int x, const unsigned int y)
+bool procs::FrameBufferIterator::inBounds(const unsigned int x, const unsigned int y)
 {
 	return (x >= 0) && (x < this->_width) && (y >= 0) && (y < this->_height);
 }
 
-bool mote::procs::FrameBufferIterator::goNext()
+bool procs::FrameBufferIterator::goNext()
 {
 	this->_cursor.x += this->_subsample;
 	if (this->_cursor.x >= this->_width)
@@ -33,7 +33,7 @@ bool mote::procs::FrameBufferIterator::goNext()
 	return (this->_cursor.y < this->_height);
 }
 
-bool mote::procs::FrameBufferIterator::go(const unsigned int x, const unsigned int y)
+bool procs::FrameBufferIterator::go(const unsigned int x, const unsigned int y)
 {
 	if (this->inBounds(x, y))
 	{
@@ -44,59 +44,59 @@ bool mote::procs::FrameBufferIterator::go(const unsigned int x, const unsigned i
 	return false;
 }
 
-bool mote::procs::FrameBufferIterator::goLeft(const unsigned int amount)
+bool procs::FrameBufferIterator::goLeft(const unsigned int amount)
 {
 	return this->go(this->_cursor.x + this->_subsample*amount, this->_cursor.y);
 }
 
-bool mote::procs::FrameBufferIterator::goRight(const unsigned int amount)
+bool procs::FrameBufferIterator::goRight(const unsigned int amount)
 {
 	return this->go(this->_cursor.x - this->_subsample*amount, this->_cursor.y);
 }
 
-bool mote::procs::FrameBufferIterator::goUp(const unsigned int amount)
+bool procs::FrameBufferIterator::goUp(const unsigned int amount)
 {
 	return this->go(this->_cursor.x, this->_cursor.y - this->_subsample*amount);
 }
 
-bool mote::procs::FrameBufferIterator::goDown(const unsigned int amount)
+bool procs::FrameBufferIterator::goDown(const unsigned int amount)
 {
 	return this->go(this->_cursor.x, this->_cursor.y + this->_subsample*amount);
 }
 
-bool mote::procs::FrameBufferIterator::get(cv::Vec3b *pixel)
+bool procs::FrameBufferIterator::get(cv::Vec3b *pixel)
 {
 	this->getPixel(pixel, this->_cursor.x, this->_cursor.y);
 }
 
-bool mote::procs::FrameBufferIterator::get(cv::Vec3b *pixel, const int offsetX, const int offsetY)
+bool procs::FrameBufferIterator::get(cv::Vec3b *pixel, const int offsetX, const int offsetY)
 {
 	return this->getPixel(pixel, this->_cursor.x + offsetX, this->_cursor.y + offsetY);
 }
 
-bool mote::procs::FrameBufferIterator::get(cv::Vec3b &pixel)
+bool procs::FrameBufferIterator::get(cv::Vec3b &pixel)
 {
 	return this->getPixel(pixel, this->_cursor.x, this->_cursor.y);
 }
 
-bool mote::procs::FrameBufferIterator::get(cv::Vec3b &pixel, const int offsetX, const int offsetY)
+bool procs::FrameBufferIterator::get(cv::Vec3b &pixel, const int offsetX, const int offsetY)
 {
 	return this->getPixel(pixel, this->_cursor.x + offsetX, this->_cursor.y + offsetY);
 }
 
-mote::procs::FramBufferIteratorRGB24::FramBufferIteratorRGB24(uint8_t *begin,
+procs::FramBufferIteratorRGB24::FramBufferIteratorRGB24(uint8_t *begin,
 	unsigned int width, unsigned int height, unsigned int subsample)
 	: FrameBufferIterator(sizeof(cv::Vec3b), begin, width, height, subsample)
 { }
 
-uint8_t *mote::procs::FramBufferIteratorRGB24::getAddress(const unsigned int x, const unsigned int y)
+uint8_t *procs::FramBufferIteratorRGB24::getAddress(const unsigned int x, const unsigned int y)
 {
 	if (this->inBounds(x, y))
 		return this->_begin + (this->_bytesPerLine * y) + (this->_bytesPerPixel * x);
 	return nullptr;
 }
 
-bool mote::procs::FramBufferIteratorRGB24::getPixel(cv::Vec3b *px, const unsigned int x, const unsigned int y)
+bool procs::FramBufferIteratorRGB24::getPixel(cv::Vec3b *px, const unsigned int x, const unsigned int y)
 {
 	uint8_t *p = this->getAddress(x, y);
 	if (p)
@@ -109,7 +109,7 @@ bool mote::procs::FramBufferIteratorRGB24::getPixel(cv::Vec3b *px, const unsigne
 	return false;
 }
 
-bool mote::procs::FramBufferIteratorRGB24::getPixel(cv::Vec3b &px, const unsigned int x, const unsigned int y)
+bool procs::FramBufferIteratorRGB24::getPixel(cv::Vec3b &px, const unsigned int x, const unsigned int y)
 {
 	uint8_t *p = this->getAddress(x, y);
 	if (p)
@@ -122,7 +122,7 @@ bool mote::procs::FramBufferIteratorRGB24::getPixel(cv::Vec3b &px, const unsigne
 	return false;
 }
 
-bool mote::procs::FramBufferIteratorRGB24::setPixel(const unsigned int x, const unsigned int y,
+bool procs::FramBufferIteratorRGB24::setPixel(const unsigned int x, const unsigned int y,
 	cv::Vec3b *px)
 {
 	uint8_t *p = this->getAddress(x, y);
@@ -136,7 +136,7 @@ bool mote::procs::FramBufferIteratorRGB24::setPixel(const unsigned int x, const 
 	return false;
 }
 
-bool mote::procs::FramBufferIteratorRGB24::setPixel(const unsigned int x, const unsigned int y,
+bool procs::FramBufferIteratorRGB24::setPixel(const unsigned int x, const unsigned int y,
 	const cv::Vec3b &px)
 {
 	uint8_t *p = this->getAddress(x, y);
@@ -150,12 +150,12 @@ bool mote::procs::FramBufferIteratorRGB24::setPixel(const unsigned int x, const 
 	return false;
 }
 
-bool mote::procs::FramBufferIteratorRGB24::setPixel(cv::Vec3b *px)
+bool procs::FramBufferIteratorRGB24::setPixel(cv::Vec3b *px)
 {
 	return this->setPixel(this->_cursor.x, this->_cursor.y, px);
 }
 
-bool mote::procs::FramBufferIteratorRGB24::setPixel(const cv::Vec3b &px)
+bool procs::FramBufferIteratorRGB24::setPixel(const cv::Vec3b &px)
 {
 	return this->setPixel(this->_cursor.x, this->_cursor.y, px);
 }

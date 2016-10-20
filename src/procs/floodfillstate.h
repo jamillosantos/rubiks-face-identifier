@@ -9,8 +9,6 @@
 #include <boost/algorithm/clamp.hpp>
 #include <opencv2/core/types.hpp>
 
-namespace mote
-{
 namespace procs
 {
 /**
@@ -80,7 +78,6 @@ public:
 	 */
 	void clear();
 };
-}
 }
 
 #endif //MOTE_VISION_DATA_FLOODFILLSTATE_H

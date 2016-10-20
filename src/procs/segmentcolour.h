@@ -15,8 +15,6 @@
 #define BRIGHT_PIXEL 256
 #define DARK_PIXEL 4
 
-namespace mote
-{
 namespace procs
 {
 
@@ -67,7 +65,7 @@ protected:
 	 * @return If fails it will return the code of the error
 	 */
 	ErrorCode doFloodFill(cv::Mat &in, cv::Mat &out, cv::Point2i p, cv::Vec3b &seed, unsigned int threshold,
-		const SegmentColourVisitor *target, unsigned int subsample, mote::procs::FloodFillState *state);
+		const SegmentColourVisitor *target, unsigned int subsample, procs::FloodFillState *state, cv::Mat &debug);
 public:
 	SegmentColour(unsigned int stackSize);
 	virtual ~SegmentColour();
@@ -86,11 +84,10 @@ public:
 	 */
 	void action(cv::Mat &in, cv::Mat &out, unsigned int threshold, unsigned int minLength, unsigned int minSize,
 		unsigned int subsample, const SegmentColourVisitor &colourDefinition,
-		std::vector<mote::procs::SegmentationColourObject> &results);
+		std::vector<procs::SegmentationColourObject> &results, cv::Mat &debug);
 
 	double pxIntensity(const cv::Vec3b &pixel);
 };
-}
 }
 
 

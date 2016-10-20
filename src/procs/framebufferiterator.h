@@ -3,14 +3,12 @@
  * @date August 17, 2016
  */
 
-#ifndef MOTE_VISION_MATCVITERATOR_H
-#define MOTE_VISION_MATCVITERATOR_H
+#ifndef PROCS_FRAMEBUFFERITERATOR_H
+#define PROCS_FRAMEBUFFERITERATOR_H
 
 #include <cstdint>
 #include <opencv2/core/mat.hpp>
 
-namespace mote
-{
 namespace procs
 {
 class FrameBufferIterator
@@ -85,6 +83,5 @@ public:
 };
 
 }
-}
 
-#endif //MOTE_VISION_MATCVITERATOR_H
+#endif //PROCS_FRAMEBUFFERITERATOR_H

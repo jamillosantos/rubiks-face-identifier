@@ -3,13 +3,11 @@
  * @date August 17, 2016
  */
 
-#ifndef MOTE_VISION_DATA_SEGMENTATIONCOLOUROBJECT_H
-#define MOTE_VISION_DATA_SEGMENTATIONCOLOUROBJECT_H
+#ifndef PROCS_SEGMENTATIONCOLOUROBJECT_H
+#define PROCS_SEGMENTATIONCOLOUROBJECT_H
 
 #include <opencv2/core/types.hpp>
 
-namespace mote
-{
 namespace procs
 {
 /**
@@ -47,8 +45,9 @@ public:
 
 	SegmentationColourObject(const cv::Rect2i &bBox, const cv::Point2i &center, unsigned int size,
 		const cv::Vec3b &average, const cv::Vec3b &seed);
+
+	SegmentationColourObject& operator=(const SegmentationColourObject& obj);
 };
 }
-}
 
-#endif //MOTE_VISION_DATA_SEGMENTATIONCOLOUROBJECT_H
+#endif //PROCS_SEGMENTATIONCOLOUROBJECT_H

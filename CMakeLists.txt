@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(mote_vision)
+project(rubiks)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
 
@@ -393,6 +393,11 @@ set(SOURCE_FILES
 	src/procs/segmentationcolourobject.h
 	src/procs/segmentcolour.cpp
 	src/procs/segmentcolour.h
+	src/procs/gridfinder.cpp
+	src/procs/gridfinder.h
+
+	src/data/cube.cpp
+	src/data/cube.h
 )
 
 add_executable(rubiks
