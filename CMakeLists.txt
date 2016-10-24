@@ -395,6 +395,10 @@ set(SOURCE_FILES
 	src/procs/segmentcolour.h
 	src/procs/gridfinder.cpp
 	src/procs/gridfinder.h
+	src/procs/colourmatches.cpp
+	src/procs/colourmatches.h
+	src/procs/visitors.cpp
+	src/procs/visitors.h
 
 	src/data/cube.cpp
 	src/data/cube.h
