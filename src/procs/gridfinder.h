@@ -6,6 +6,7 @@
 #ifndef RUBIKS_PROCS_CLASSIFIER_H
 #define RUBIKS_PROCS_CLASSIFIER_H
 
+#include <iostream>
 #include <list>
 #include "segmentationcolourobject.h"
 
@@ -16,9 +17,9 @@ template <typename T>
 double verticalIntersectionFactor(const cv::Rect_<T> &a, const cv::Rect_<T> &b)
 {
 	return std::max((
-		std::min(a.y + a.height, b.y + b.height)
-		- std::max(a.y, b.y)
-	) / (double)std::min(a.height, b.height), 0.0);
+		std::min((double)(a.y + a.height), (double)(b.y + b.height))
+		- std::max((double)a.y, (double)b.y)
+	) / std::min((double)a.height, (double)b.height), (double)0.0);
 }
 
 class SementGroup
@@ -30,10 +31,12 @@ public:
 class GridFinder
 {
 private:
-	bool findBy(procs::SegmentationColourObject *seed, std::list<SegmentationColourObject*> objects,
-		std::vector<procs::SegmentationColourObject*> &grid);
+	void groupByLines(std::list<procs::SegmentationColourObject*> &objects,
+		std::vector<std::vector<procs::SegmentationColourObject*>> &lines);
 public:
-	void find(std::vector<SegmentationColourObject> &objects, std::vector<procs::SegmentationColourObject*> &grid);
+	void find(std::vector<SegmentationColourObject*> &objects, std::vector<procs::SegmentationColourObject*> &grid);
+
+	void findLine(std::vector<SegmentationColourObject *> line, std::vector<SegmentationColourObject *> objects);
 };
 }
 

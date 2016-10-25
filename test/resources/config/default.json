@@ -1,0 +1,17 @@
+{
+	"camera": {
+		"camera": "/dev/video1",
+		"width": 320,
+		"height": 240
+	},
+	"grid": {
+		"center": {
+			"x": 172,
+			"y": 126
+		},
+		"corner": {
+			"x": 103,
+			"y": 58
+		}
+	}
+}

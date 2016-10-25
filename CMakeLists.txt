@@ -402,7 +402,7 @@ set(SOURCE_FILES
 
 	src/data/cube.cpp
 	src/data/cube.h
-)
+	src/data/configuration.cpp src/data/configuration.h)
 
 add_executable(rubiks
 	src/main.cpp
@@ -410,11 +410,21 @@ add_executable(rubiks
 	${SOURCE_FILES}
 )
 
+add_executable(camera_calibration
+	src/calibration.cpp
+
+	${SOURCE_FILES}
+	src/procs/device.cpp src/procs/device.h src/procs/gridtracer.cpp src/procs/gridtracer.h)
+
 set(rubiks_libraries
 	"${OpenCV_LIBS};${jsoncpp};${Boost_LIBRARIES};pthread"
 	)
 
 target_link_libraries(rubiks
+	${rubiks_libraries}
+	)
+
+target_link_libraries(camera_calibration
 	${rubiks_libraries}
 	)
 
